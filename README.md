@@ -140,7 +140,7 @@ int main() {
 }
 
 ```
-Running the `safe_printf` prints a helpful error to the console:
+Running `safe_printf` on this program prints a helpful error to the console:
 ```
 Error:
   × Source code contains errors.
