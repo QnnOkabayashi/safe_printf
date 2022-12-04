@@ -80,6 +80,10 @@ int main() {
 }
 ```
 
+Optimized is still a work in progress, but the idea is that there will eventually
+be an associated C library that will provide bindings to `safe_*` print functions,
+taking advantage of the fact that format strings are already interpolated by the tool.
+
 To get optimized formatting, run the following:
 ```
 safe_printf examples/readme.c --optimize examples/readme_optimize.c
@@ -112,3 +116,55 @@ int main() {
     return 0;
 }
 ```
+
+## Errors
+Another focus of this application is helpful error messages.
+Take _`examples/unsafe.c`_ for example:
+```c
+#include <stdio.h>
+
+int main() {
+    printf("I will echo\n");
+    char credit_card[] = "123";
+    while(1) {
+        char input[1024] = {0};
+        setvbuf(stdin, NULL, _IONBF, 0);
+        printf("> ");
+        fgets(input, 1023, stdin);
+
+        printf("normal: %s", input);
+        printf("unsafe: ");
+        printf(input, 1); // adding an arg here evades even -Wpedantic...
+        printf("%s is %s", input); // gcc catches this though
+    }
+}
+
+```
+Running the `safe_printf` prints a helpful error to the console:
+```
+Error:
+  × Source code contains errors.
+
+Error:
+  × Format string isn't a string literal, this is potentially an overflow vulnerability!
+    ╭─[examples/unsafe.c:13:1]
+ 13 │         printf("unsafe: ");
+ 14 │         printf(input, 1); // adding an arg here evades even -Wpedantic...
+    ·                ──┬──
+    ·                  ╰── not a string literal
+ 15 │         printf("%s is %s", input); // gcc catches this though
+    ╰────
+  help: To safely print a string, use `printf("%s", input)` instead.
+Error:
+  × Excess specifiers, this will read arbitrary data off the stack!
+    ╭─[examples/unsafe.c:14:1]
+ 14 │         printf(input, 1); // adding an arg here evades even -Wpedantic...
+ 15 │         printf("%s is %s", input); // gcc catches this though
+    ·                ─────┬───────┬───
+    ·                     │       ╰── not enough arguments
+    ·                     ╰── 1 too many specifiers
+ 16 │     }
+    ╰────
+  help: Add an argument or remove a specifier.
+```
+> Note: some markdown renders may render the lines weirdly, but they show up straight (and with pretty colors!) in the terminal.
