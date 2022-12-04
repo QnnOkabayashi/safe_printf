@@ -410,7 +410,6 @@ pub fn parse_args<'src, const PRE_ARGS: usize>(
                                 cast_span,
                                 cast_ctype,
                             });
-                            maybe_pairs = None;
                         }
                     }
                     _ => { /* ignore  */ }

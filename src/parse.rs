@@ -73,21 +73,19 @@ impl<'lex, 'src> Iterator for Args<'lex, 'src> {
     fn next(&mut self) -> Option<Self::Item> {
         self.has_remaining?;
 
-        let mut cast: Option<(CType, Range<usize>)> = None;
-        let mut span: Option<Range<usize>> = None;
-        let mut opened: u32 = 0;
-        let mut single_token: Option<ArgToken<'src>> = None;
-        let mut count: u32 = 0;
+        let mut cast = None;
+        let mut span = None;
+        let mut opened = 0u32;
+        let mut single_token = None;
+        let mut count = 0u32;
 
         loop {
             match self.lex.next()? {
                 ArgToken::Comma if opened == 0 => {
                     // parsed an argument, now expecting another
-                    let span = span?;
-                    self.end = span.end;
                     return Some(Arg {
                         single_token,
-                        span,
+                        span: span?,
                         cast,
                     });
                 }
@@ -97,12 +95,11 @@ impl<'lex, 'src> Iterator for Args<'lex, 'src> {
                     None => {
                         // parsed the last argument
                         self.has_remaining = None;
-                        let span = span?;
                         self.end = self.lex.span().start;
                         self.source_lex.bump(self.end - self.start + 1);
                         return Some(Arg {
                             single_token,
-                            span,
+                            span: span?,
                             cast,
                         });
                     }
