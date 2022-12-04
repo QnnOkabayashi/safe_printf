@@ -1,0 +1,11 @@
+[package]
+name = "safe_printf"
+version = "0.1.0"
+edition = "2021"
+authors = ["Quinn Okabayashi <quinnokabayashi@gmail.com>"]
+
+[dependencies]
+clap = { version = "4.0.29", features = ["derive"] }
+displaydoc = "0.2.3"
+logos = "0.12.1"
+miette = { version = "5.5.0", features = ["fancy"] }
