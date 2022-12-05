@@ -134,28 +134,23 @@ impl<'src> IntermediateRepresentation<'src> {
                     }
                 };
 
-                write!(f, "{}, {{ ", format.len())?;
+                write!(f, "{}", format.pairs.len() * 3 + 1)?;
 
                 for (chunk, displayable) in format.pairs.iter() {
-                    if displayable.type_checked {
-                        write!(
-                            f,
-                            "\"{chunk}\", {{ {}, {} }}, ",
-                            displayable.arg,
-                            displayable.specifier.ctype.format_fn()
-                        )?;
-                    } else {
-                        write!(
-                            f,
-                            "\"{chunk}\", {{ ({}) ({}), {} }}, ",
-                            displayable.specifier.ctype,
-                            displayable.arg,
-                            displayable.specifier.ctype.format_fn()
-                        )?;
-                    }
+                    write!(
+                        f,
+                        ", \"{chunk}\", (void*) {}({}), {}",
+                        if displayable.specifier.ctype != CType::String {
+                            "&"
+                        } else {
+                            ""
+                        },
+                        displayable.arg,
+                        displayable.specifier.ctype.format_fn()
+                    )?;
                 }
 
-                write!(f, "\"{}\" }})", format.last)
+                write!(f, ", \"{}\")", format.last)
             },
         }
     }
@@ -312,11 +307,6 @@ impl<'src, T> Interpolation<'src, T> {
     /// Returns a new [`Interpolation`].
     pub fn new(pairs: Vec<(&'src str, T)>, last: &'src str) -> Self {
         Self { pairs, last }
-    }
-
-    /// Returns the number of elements.
-    fn len(&self) -> usize {
-        self.pairs.len() * 2 + 1
     }
 }
 
