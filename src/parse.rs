@@ -21,7 +21,7 @@ pub struct Arg<'src> {
 #[derive(Debug)]
 pub struct Args<'lex, 'src> {
     // hold onto source_lex so we can bump it when done parsing
-    source_lex: &'lex mut Lexer<'src, SourceToken>,
+    source_lex: &'lex mut Lexer<'src, SourceToken<'src>>,
     lex: Lexer<'src, ArgToken<'src>>,
     has_remaining: Option<()>,
     start: usize,
@@ -30,7 +30,7 @@ pub struct Args<'lex, 'src> {
 
 impl<'lex, 'src> Args<'lex, 'src> {
     /// Returns a new [`Args`].
-    pub fn new(source_lex: &'lex mut Lexer<'src, SourceToken>) -> Self {
+    pub fn new(source_lex: &'lex mut Lexer<'src, SourceToken<'src>>) -> Self {
         let mut lex = ArgToken::lexer(source_lex.source());
         let start = source_lex.span().end;
         lex.bump(start);

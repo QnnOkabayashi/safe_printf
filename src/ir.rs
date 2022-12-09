@@ -21,7 +21,7 @@ impl<'src> IntermediateRepresentation<'src> {
 
         while let Some(token) = lex.next() {
             let (before, site) = match token {
-                SourceToken::Printf => {
+                SourceToken::Identifier("printf") => {
                     let before = span
                         .as_ref()
                         .map(|span| &source[span.start..lex.span().start])
@@ -38,7 +38,7 @@ impl<'src> IntermediateRepresentation<'src> {
 
                     (before, printf)
                 }
-                SourceToken::Sprintf => {
+                SourceToken::Identifier("sprintf") => {
                     let before = span
                         .take()
                         .map(|span| &source[span.start..lex.span().start])
@@ -55,7 +55,7 @@ impl<'src> IntermediateRepresentation<'src> {
 
                     (before, sprintf)
                 }
-                SourceToken::Snprintf => {
+                SourceToken::Identifier("snprintf") => {
                     let before = span
                         .take()
                         .map(|span| &source[span.start..lex.span().start])
@@ -328,7 +328,7 @@ impl<'src, T> Interpolation<'src, T> {
 /// //      assumes lexer starts here                       lexer ends up here
 /// ```
 pub fn parse_args<'src, const PRE_ARGS: usize>(
-    lex: &mut Lexer<'src, SourceToken>,
+    lex: &mut Lexer<'src, SourceToken<'src>>,
     errors: &mut Vec<Error>,
 ) -> Option<(
     [&'src str; PRE_ARGS],

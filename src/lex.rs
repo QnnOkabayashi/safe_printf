@@ -3,6 +3,8 @@ use crate::parse::Specifier;
 use logos::Logos;
 
 #[derive(Debug, Clone, Copy, Logos, PartialEq, Eq)]
+#[logos(subpattern l = "[a-zA-Z_$]")]
+#[logos(subpattern a = "[a-zA-Z_$0-9]")]
 // char prefix
 #[logos(subpattern cp = r"[uUL]")]
 // string prefix
@@ -11,7 +13,7 @@ use logos::Logos;
 #[logos(subpattern ws = r"[ \t\v\r\n\f]")]
 // escape sequence
 #[logos(subpattern es = r#"[\\](['"%?\\abefnrtv]|[0-7]+|[xu][a-fA-F0-9]+|[\r]?[\n])"#)]
-pub enum SourceToken {
+pub enum SourceToken<'src> {
     #[regex("//[^\r\n]*")]
     #[token("/*", |lex| {
         lex.bump(lex.remainder().find("*/")? + 2);
@@ -28,14 +30,8 @@ pub enum SourceToken {
     #[token(")")]
     RParen,
 
-    #[token("printf")]
-    Printf,
-
-    #[token("sprintf")]
-    Sprintf,
-
-    #[token("snprintf")]
-    Snprintf,
+    #[regex("(?&l)(?&a)*")]
+    Identifier(&'src str),
 
     #[regex(r"(?&ws)+", logos::skip)]
     Whitespace,
